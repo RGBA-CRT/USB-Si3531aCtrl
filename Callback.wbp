@@ -117,7 +117,7 @@ Function EventCall_MainWnd(hWnd As HWND, message As DWord, wParam As WPARAM, lPa
 			SendMessage(GetDlgItem(hWnd,CommandButton1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
 			CreateWindowEx(&H00000000,"COMBOBOX","",&H50200002,75,324,219,84,hWnd,ComboBox1 As HMENU,GetModuleHandle(0),0)
 			SendMessage(GetDlgItem(hWnd,ComboBox1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
-			CreateWindowEx(&H00000000,"STATIC","FT252H : ",&H50000100,24,327,46,12,hWnd,Static15 As HMENU,GetModuleHandle(0),0)
+			CreateWindowEx(&H00000000,"STATIC","FT232H : ",&H50000100,24,327,46,12,hWnd,Static15 As HMENU,GetModuleHandle(0),0)
 			SendMessage(GetDlgItem(hWnd,Static15),WM_SETFONT,hFont_MainWnd As WPARAM,0)
 			CreateWindowEx(&H00000000,"STATIC","Rdiv[128]",&H50000000,24,276,57,12,hWnd,Static16 As HMENU,GetModuleHandle(0),0)
 			SendMessage(GetDlgItem(hWnd,Static16),WM_SETFONT,hFont_MainWnd As WPARAM,0)
