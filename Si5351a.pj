@@ -1,0 +1,26 @@
+' ActiveBasic Project file.
+
+#VERSION=9
+
+#MODULETYPE=0
+
+#NAME=Si5351a
+
+#PLATFORM=32
+
+#USEWINDOW=1
+
+#OPTION=&H00010000
+
+#OUTPUT_RELEASE=.\Si5351a.exe
+
+#OUTPUT_DEBUG=.\Si5351a_debug.exe
+
+#RESOURCE=Si5351a.rc
+
+#SOURCE
+Si5351a.abp
+MainWnd.sbp
+FTI2CLib.sbp
+libMPSSE.sbp
+Si531aLib.abp

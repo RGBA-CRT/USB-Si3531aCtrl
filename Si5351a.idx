@@ -1,0 +1,21 @@
+' インデックス プログラム
+
+#strict
+
+'Win32APIの定義ファイル
+
+'RADツールが生成するウィンドウ制御プログラム
+#include "Callback.wbp"
+
+'プロジェクト内のプログラム ファイル
+#include "MainWnd.sbp"
+#include "FTI2CLib.sbp"
+#include "libMPSSE.sbp"
+#include "Si531aLib.abp"
+
+'RADツールが生成するウィンドウ生成プログラム
+#include "MakeWindow.wbp"
+
+'リソースファイル
+#include "resource.sbp"
+#resource "Si5351a.rc"

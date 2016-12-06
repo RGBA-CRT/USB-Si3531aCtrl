@@ -1,0 +1,241 @@
+'-----------------------------------------------------------------------------
+'  イベント プロシージャ
+'-----------------------------------------------------------------------------
+' このファイルには、ウィンドウ [MainWnd] に関するイベントをコーディングします。
+' ウィンドウ ハンドル: hMainWnd
+
+' TODO: この位置にグローバルな変数、構造体、定数、関数を定義します。
+
+
+'-----------------------------------------------------------------------------
+' ウィンドウメッセージを処理するためのコールバック関数
+
+Function MainWndProc(hWnd As HWND, dwMsg As DWord, wParam As WPARAM, lParam As LPARAM) As DWord
+	' TODO: この位置にウィンドウメッセージを処理するためのコードを記述します。
+
+	' イベントプロシージャの呼び出しを行います。
+	MainWndProc=EventCall_MainWnd(hWnd,dwMsg,wParam,lParam)
+End Function
+
+Function MWnd(DlgID AS Long) AS HANDLE
+	MWnd=GetDlgItem(hMainWnd,DlgID)
+End Function
+
+Function GetTrackBarValue(hWnd As HANDLE) AS Long
+	GetTrackBarValue=SendMessage(hWnd,TBM_GETPOS,0,0)
+End Function
+
+Sub SetTrackBarValue(hWnd AS HANDLE,value AS DWord)
+	SendMessage(hWnd,TBM_SETPOS,TRUE,value)
+End Sub
+'-----------------------------------------------------------------------------
+' ここから下は、イベントプロシージャを記述するための領域になります。
+
+Sub MainWnd_Destroy()
+	Si5351a_DestroyObjects()
+	PostQuitMessage(0)
+End Sub
+
+Const ND_MAX = 1048575
+Const VCODIV_MAX=1800
+Const VCODIV_MIN=6
+Sub MainWnd_Create(ByRef CreateStruct As CREATESTRUCT)
+	SendMessage(MWnd(TrackBar1),TBM_SETRANGE,TRUE,MAKELONG(15,90))
+	SendMessage(MWnd(TrackBar2),TBM_SETRANGEMIN	,TRUE,0)
+	SendMessage(MWnd(TrackBar2),TBM_SETRANGEMAX	,TRUE,ND_MAX)
+	SendMessage(MWnd(TrackBar3),TBM_SETRANGEMIN	,TRUE,1)
+	SendMessage(MWnd(TrackBar3),TBM_SETRANGEMAX	,TRUE,ND_MAX)
+
+	
+	SendMessage(MWnd(TrackBar4),TBM_SETRANGE,TRUE,MAKELONG(VCODIV_MIN,VCODIV_MAX))
+	SendMessage(MWnd(TrackBar5),TBM_SETRANGEMIN	,TRUE,0)
+	SendMessage(MWnd(TrackBar5),TBM_SETRANGEMAX	,TRUE,ND_MAX)
+	SendMessage(MWnd(TrackBar6),TBM_SETRANGEMIN	,TRUE,1)
+	SendMessage(MWnd(TrackBar6),TBM_SETRANGEMAX	,TRUE,ND_MAX)
+	SendMessage(MWnd(TrackBar7),TBM_SETRANGE,TRUE,MAKELONG(0,7))
+
+	ApplyEditBox()
+
+	ListupDevices()
+End Sub
+
+Sub ListupDevices()
+	Dim devCount AS Long',str[1024] AS Byte
+
+	SendMessage(MWnd(ComboBox1),CB_RESETCONTENT,0,0)
+
+	if I2C_GetNumChannels(VarPtr(devCount))<>FT_OK Then ExitFunction
+	if devCount=0 Then SendMessage(MWnd(ComboBox1),CB_ADDSTRING,0,"FTDI Device not found." AS Long):Goto *LD_END
+
+	Dim i AS Long
+	Dim devList AS FT_DEVICE_LIST_INFO_NODE
+	For i = 0 To devCount-1
+		I2C_GetChannelInfo(i,VarPtr(devList))
+		SendMessage(MWnd(ComboBox1),CB_ADDSTRING,0, _
+				sprintfStr(ex"[%02d]%s - %s\n",i,devList.SerialNumber As DWord,devList.Description AS DWord))
+	Next i
+
+*LD_END
+	SendMessage(MWnd(ComboBox1),CB_SETCURSEL,0,0)
+
+End Sub
+Sub MainWnd_HScroll(nScrollCode As Long, nPos As Integer, hwndScrollBar As HWND)
+	UpdateEditBox()
+	DispValues()
+
+End Sub
+
+'トラックバーがへんこうされたとき
+Sub UpdateEditBox()
+	'vco
+	SetWindowText(MWnd(EditBox1),Str$(GetTrackBarValue(MWnd(TrackBar1))))
+	SetWindowText(MWnd(EditBox3),Str$(GetTrackBarValue(MWnd(TrackBar2))))
+	SetWindowText(MWnd(EditBox4),Str$(GetTrackBarValue(MWnd(TrackBar3))))
+	'fout
+	SetWindowText(MWnd(EditBox5),Str$(GetTrackBarValue(MWnd(TrackBar4))))
+	SetWindowText(MWnd(EditBox7),Str$(GetTrackBarValue(MWnd(TrackBar5))))
+	SetWindowText(MWnd(EditBox8),Str$(GetTrackBarValue(MWnd(TrackBar6))))
+	SetWindowText(MWnd(EditBox9),Str$(GetTrackBarValue(MWnd(TrackBar7))))
+	SetWindowText(MWnd(Static17),"="+Str$(1<<GetTrackBarValue(MWnd(TrackBar7))))
+End Sub
+
+Sub UpdateTrackBar()
+	'vco
+	SetTrackBarValue(MWnd(TrackBar1),GetDlgItemInt(hMainWnd,EditBox1,0,FALSE))
+	SetTrackBarValue(MWnd(TrackBar2),GetDlgItemInt(hMainWnd,EditBox3,0,FALSE))
+	SetTrackBarValue(MWnd(TrackBar3),GetDlgItemInt(hMainWnd,EditBox4,0,FALSE))
+	'fout
+	SetTrackBarValue(MWnd(TrackBar4),GetDlgItemInt(hMainWnd,EditBox5,0,FALSE))
+	SetTrackBarValue(MWnd(TrackBar5),GetDlgItemInt(hMainWnd,EditBox7,0,FALSE))
+	SetTrackBarValue(MWnd(TrackBar6),GetDlgItemInt(hMainWnd,EditBox8,0,FALSE))
+	SetTrackBarValue(MWnd(TrackBar7),GetDlgItemInt(hMainWnd,EditBox9,0,FALSE))
+End Sub
+
+Function CalcVCO() AS Double
+	Dim m AS Long,n AS Long,d AS Long,crystal AS Long
+	crystal=GetDlgItemInt(hMainWnd,EditBox2,0,FALSE)
+	m=GetDlgItemInt(hMainWnd,EditBox1,0,FALSE)
+	n=GetDlgItemInt(hMainWnd,EditBox3,0,FALSE)
+	d=GetDlgItemInt(hMainWnd,EditBox4,0,FALSE)
+	CalcVCO=crystal*(m+n/d)
+End Function
+
+Function CalcFdiv() AS Double
+	Dim m AS Long,n AS Long,d AS Long,rd AS Long
+	m=GetDlgItemInt(hMainWnd,EditBox5,0,FALSE)
+	n=GetDlgItemInt(hMainWnd,EditBox7,0,FALSE)
+	d=GetDlgItemInt(hMainWnd,EditBox8,0,FALSE)
+	rd=1<<GetDlgItemInt(hMainWnd,EditBox9,0,FALSE)
+	CalcFdiv=(m + (n/d)) * rd
+End Function
+
+Function CalcFout() AS Double
+	CalcFout=CalcVCO() / CalcFdiv()
+End Function
+
+Sub DispValues()
+	Dim vco AS Double
+	vco=CalcVCO()
+	SetWindowText(MWnd(Static7),sprintfStr("vco=%d.%d[MHz]",vco AS DWord,((vco-Int(vco) AS Double)*10000) AS DWord))
+
+	Dim Mes aS BytePtr
+	if vco<600 or vco>900 Then
+		Mes="VCO frequency in the range of 600 to 900 MHz."
+	Else
+		Mes="VCO OK"
+	End If
+	SetWindowText(MWnd(Static13),Mes)
+
+	Dim fout AS Double,fdiv as Double
+	fout=CalcFout()
+	SetWindowText(MWnd(Static12),sprintfStr("fout=%d.%d[MHz]",fout AS DWord,((fout-Int(fout) AS Double)*10000) AS DWord))
+
+	fdiv=CalcFdiv()
+	if fdiv<6 or fdiv>1800 Then
+		Mes="fout NG [6 < (a + (b/c)) < 1800] "
+	Else
+		Mes="fout OK"
+	End If
+	SetWindowText(MWnd(Static8),Mes)
+
+End Sub
+
+Sub ApplyEditBox()
+	UpdateTrackBar()
+	UpdateEditBox()	'もし範囲外なら戻される
+	DispValues()
+End Sub
+
+Sub MainWnd_EditBox1_KillFocus()	: ApplyEditBox() : End Sub
+Sub MainWnd_EditBox3_KillFocus()	: ApplyEditBox() : End Sub
+Sub MainWnd_EditBox4_KillFocus()	: ApplyEditBox() : End Sub
+Sub MainWnd_EditBox5_KillFocus()	: ApplyEditBox() : End Sub
+Sub MainWnd_EditBox7_KillFocus()	: ApplyEditBox() : End Sub
+Sub MainWnd_EditBox8_KillFocus()	: ApplyEditBox() : End Sub
+Sub MainWnd_EditBox9_KillFocus()	: ApplyEditBox() : End Sub
+
+Function GetOpenDeviceIndex() As Long
+	GetOpenDeviceIndex=SendMessage(MWnd(ComboBox1),CB_GETCURSEL,0,0)
+End Function
+
+Sub DBM(text AS BytePtr)
+	SetWindowText(hMainWnd,text)
+End Sub
+
+Sub MainWnd_CommandButton1_Click()
+	Dim iic AS *FTDI_MPSSE_I2C
+	Dim lcd AS *I2C_LCD_ST7032
+	Dim clk AS *I2C_Si5351A
+
+	iic=new FTDI_MPSSE_I2C()
+	lcd=new I2C_LCD_ST7032(iic)
+	clk=new I2C_Si5351A(iic)
+
+	if iic->openDevice(GetOpenDeviceIndex())<>0 Then 
+		MessageBox(hMainWnd,"デバイスを開けませんでした",0,MB_ICONERROR)
+		ExitSub
+	End If
+
+	lcd->init()
+	clk->SetClk0(GetDlgItemInt(hMainWnd,EditBox1,0,FALSE), _
+				 GetDlgItemInt(hMainWnd,EditBox3,0,FALSE), _
+				 GetDlgItemInt(hMainWnd,EditBox4,0,FALSE), _
+				 GetDlgItemInt(hMainWnd,EditBox5,0,FALSE), _
+				 GetDlgItemInt(hMainWnd,EditBox7,0,FALSE), _
+				 GetDlgItemInt(hMainWnd,EditBox8,0,FALSE), _
+				 0, _
+				 GetDlgItemInt(hMainWnd,EditBox9,0,FALSE) AS Byte)
+
+	Dim fout AS Double
+	fout=CalcFout()
+	lcd->print(0,0,"Set freq:")
+	if fout > 1 Then
+		lcd->print(0,1,sprintfStr("%3d.%dMHz",fout AS DWord,((fout-Int(fout) AS Double)*10) AS DWord))
+	Else
+		fout=fout*1000
+		lcd->print(0,1,sprintfStr("%3d.%dKHz",fout AS DWord,((fout-Int(fout) AS Double)*10) AS DWord))
+	End If
+
+	delete iic
+	delete lcd
+	delete clk
+End Sub
+
+Sub MainWnd_EditBox7_Change()
+
+End Sub
+
+Function Bin$(Num As DWord)(Wide As Byte) AS String
+	Dim i AS Long,buf[32] AS Byte
+	if Wide>4 Then Wide=4
+	if Wide=0 Then Wide=4
+
+	For i=0 To Wide*8-1
+		buf[Wide*8-1-i]=&H30 + ((Num >> i) And 1)
+	Next i
+	Bin$=MakeStr(buf)
+End Function
+
+Sub MainWnd_Static15_Click()
+	ListupDevices()
+End Sub

@@ -1,0 +1,220 @@
+'このファイルはウィンドウ定義ファイル（*.wnd）をもとに生成されています
+
+Const GroupBox1=1000
+Const Static1=1001
+Const EditBox1=1002
+Const TrackBar1=1003
+Const Static2=1004
+Const EditBox2=1005
+Const Static3=1006
+Const Static4=1007
+Const EditBox3=1008
+Const TrackBar2=1009
+Const Static5=1010
+Const EditBox4=1011
+Const TrackBar3=1012
+Const Static6=1013
+Const Static7=1014
+Const GroupBox2=1015
+Const EditBox5=1016
+Const TrackBar4=1017
+Const Static9=1018
+Const EditBox7=1019
+Const TrackBar5=1020
+Const Static10=1021
+Const EditBox8=1022
+Const TrackBar6=1023
+Const Static11=1024
+Const Static12=1025
+Const Static13=1026
+Const Static14=1027
+Const Static8=1028
+Const CommandButton1=1029
+Const ComboBox1=1030
+Const Static15=1031
+Const Static16=1032
+Const EditBox9=1033
+Const TrackBar7=1034
+Const Static17=1035
+
+Dim hMainWnd As HWND
+Dim hFont_MainWnd As HFONT
+hFont_MainWnd=CreateFont(-12,0,0,0,400,0,0,0,128,3,2,1,32,"ＭＳ Ｐゴシック")
+Dim h3DFaceBrush As HBRUSH
+h3DFaceBrush=CreateSolidBrush(GetSysColor(COLOR_3DFACE))
+
+
+Sub Si5351a_DestroyObjects()
+	DeleteObject(hFont_MainWnd)
+	DeleteObject(h3DFaceBrush)
+End Sub
+
+Function EventCall_MainWnd(hWnd As HWND, message As DWord, wParam As WPARAM, lParam As LPARAM) As LRESULT
+	Select Case message
+		Case WM_DESTROY
+			MainWnd_Destroy()
+		Case WM_CREATE
+			hMainWnd=hWnd
+			CreateWindowEx(&H00000000,"BUTTON","VCO",&H50000007,14,30,425,129,hWnd,GroupBox1 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,GroupBox1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","簡易Si5351A 計算＆制御ツール[FT232H-I2C]",&H50000000,12,6,381,12,hWnd,Static1 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","32",&H50000000,361,66,70,18,hWnd,EditBox1 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"msctls_trackbar32","",&H50000019,80,68,277,19,hWnd,TrackBar1 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,TrackBar1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","XTAL[MHz] ：",&H50000002,252,47,102,12,hWnd,Static2 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static2),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","25",&H50000000,361,43,70,18,hWnd,EditBox2 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox2),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","m[15-90]",&H50000000,24,70,52,12,hWnd,Static3 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static3),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","n[1048575]",&H50000000,24,93,61,14,hWnd,Static4 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static4),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","0",&H50000000,361,90,70,18,hWnd,EditBox3 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox3),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"msctls_trackbar32","",&H50000019,80,91,278,19,hWnd,TrackBar2 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,TrackBar2),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","d[1048575]",&H50000000,24,116,59,14,hWnd,Static5 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static5),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","1",&H50000000,361,114,70,18,hWnd,EditBox4 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox4),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"msctls_trackbar32","",&H50000019,80,113,278,19,hWnd,TrackBar3 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,TrackBar3),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","fvco = crystal × (m + n/d)",&H50000000,24,48,145,12,hWnd,Static6 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static6),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","vco=0[MHz]",&H50000002,284,139,147,12,hWnd,Static7 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static7),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"BUTTON","Output Frequency",&H50000007,14,166,425,151,hWnd,GroupBox2 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,GroupBox2),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","32",&H50000000,361,202,70,18,hWnd,EditBox5 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox5),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"msctls_trackbar32","",&H50000019,80,204,277,19,hWnd,TrackBar4 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,TrackBar4),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","a[6-1800]",&H50000000,24,206,61,12,hWnd,Static9 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static9),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","0",&H50000000,361,226,70,18,hWnd,EditBox7 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox7),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"msctls_trackbar32","",&H50000019,80,227,278,19,hWnd,TrackBar5 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,TrackBar5),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","c[1048575]",&H50000000,24,252,61,14,hWnd,Static10 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static10),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","1",&H50000000,361,250,70,18,hWnd,EditBox8 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox8),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"msctls_trackbar32","",&H50000019,80,249,278,19,hWnd,TrackBar6 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,TrackBar6),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","fout = fvco / ( (a + (b/c)) * Rdiv )　[6-1800]",&H50000000,24,184,234,12,hWnd,Static11 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static11),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","fout=0[MHz]",&H50000002,284,299,147,12,hWnd,Static12 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static12),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","Text13",&H50000000,24,139,272,12,hWnd,Static13 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static13),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","b[1048575]",&H50000000,24,229,61,14,hWnd,Static14 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static14),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","Text8",&H50000000,24,299,198,12,hWnd,Static8 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static8),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"BUTTON","適用",&H50000000,350,324,88,21,hWnd,CommandButton1 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,CommandButton1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"COMBOBOX","",&H50200002,75,324,219,84,hWnd,ComboBox1 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,ComboBox1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","FT252H : ",&H50000100,24,327,46,12,hWnd,Static15 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static15),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","Rdiv[128]",&H50000000,24,276,57,12,hWnd,Static16 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static16),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000200,"EDIT","0",&H50000000,361,273,38,18,hWnd,EditBox9 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,EditBox9),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"msctls_trackbar32","",&H50000019,80,272,278,19,hWnd,TrackBar7 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,TrackBar7),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			CreateWindowEx(&H00000000,"STATIC","=128",&H50000002,403,276,25,12,hWnd,Static17 As HMENU,GetModuleHandle(0),0)
+			SendMessage(GetDlgItem(hWnd,Static17),WM_SETFONT,hFont_MainWnd As WPARAM,0)
+			MainWnd_Create(ByVal (lParam As VoidPtr))
+		Case WM_HSCROLL
+			MainWnd_HScroll(LOWORD(wParam),HIWORD(wParam),lParam As HWND)
+		Case WM_CLOSE
+			Dim cancel=0 As Integer
+			If cancel=0 Then DestroyWindow(hWnd)
+		Case WM_COMMAND
+			Select Case LOWORD(wParam)
+				Case EditBox1
+					Select Case HIWORD(wParam)
+						Case EN_KILLFOCUS
+							MainWnd_EditBox1_KillFocus()
+					End Select
+				Case EditBox3
+					Select Case HIWORD(wParam)
+						Case EN_KILLFOCUS
+							MainWnd_EditBox3_KillFocus()
+					End Select
+				Case EditBox4
+					Select Case HIWORD(wParam)
+						Case EN_KILLFOCUS
+							MainWnd_EditBox4_KillFocus()
+					End Select
+				Case EditBox5
+					Select Case HIWORD(wParam)
+						Case EN_KILLFOCUS
+							MainWnd_EditBox5_KillFocus()
+					End Select
+				Case EditBox7
+					Select Case HIWORD(wParam)
+						Case EN_KILLFOCUS
+							MainWnd_EditBox7_KillFocus()
+						Case EN_CHANGE
+							MainWnd_EditBox7_Change()
+					End Select
+				Case EditBox8
+					Select Case HIWORD(wParam)
+						Case EN_KILLFOCUS
+							MainWnd_EditBox8_KillFocus()
+					End Select
+				Case EditBox9
+					Select Case HIWORD(wParam)
+						Case EN_KILLFOCUS
+							MainWnd_EditBox9_KillFocus()
+					End Select
+				Case CommandButton1
+					Select Case HIWORD(wParam)
+						Case BN_CLICKED
+							MainWnd_CommandButton1_Click()
+					End Select
+				Case Static15
+					Select Case HIWORD(wParam)
+						Case STN_CLICKED
+							MainWnd_Static15_Click()
+					End Select
+			End Select
+		Case Else
+			EventCall_MainWnd=DefWindowProc(hWnd,message,wParam,lParam)
+			Exit Function
+	End Select
+	EventCall_MainWnd=0
+End Function
+
+Function DefaultCallProc(hWnd As HWND, message As DWord, wParam As WPARAM, lParam As LPARAM) As LRESULT
+	DefaultCallProc=DefWindowProc(hWnd,message,wParam,lParam)
+End Function
+
+Dim _RadSys_dlgwcl As WNDCLASSEX
+FillMemory(VarPtr(_RadSys_dlgwcl),Len(_RadSys_dlgwcl),0)
+_RadSys_dlgwcl.cbSize=Len(_RadSys_dlgwcl)
+_RadSys_dlgwcl.hInstance=GetModuleHandle(0)
+_RadSys_dlgwcl.style=CS_HREDRAW or CS_VREDRAW or CS_DBLCLKS
+_RadSys_dlgwcl.hIcon=LoadIcon(NULL,MAKEINTRESOURCE(IDI_APPLICATION))
+_RadSys_dlgwcl.hIconSm=LoadIcon(NULL,MAKEINTRESOURCE(IDI_WINLOGO))
+_RadSys_dlgwcl.hCursor=LoadCursor(NULL,MAKEINTRESOURCE(IDC_ARROW))
+_RadSys_dlgwcl.lpszClassName="NORMALDLG"
+_RadSys_dlgwcl.hbrBackground=h3DFaceBrush
+_RadSys_dlgwcl.lpfnWndProc=AddressOf(DefaultCallProc)
+RegisterClassEx(_RadSys_dlgwcl)
+
+Function DialogBox(hOwnerWnd As HWND, TemplateName As LPSTR) As LONG_PTR
+	Dim hDlg As HWND
+End Function
+Sub EndDialog(hWnd As HWND, lResult As Long)
+	EnableWindow(GetWindow(hWnd,GW_OWNER),1)
+	DestroyWindow(hWnd)
+	PostMessage(0,WM_QUIT,lResult,0)
+End Sub
+
+Function CreateDialog(hOwnerWnd As HWND, TemplateName As LPSTR) As HWND
+End Function
