@@ -13,4 +13,4 @@ _RadSys_wcl.lpszClassName="NORMAL0"
 _RadSys_wcl.lpfnWndProc=AddressOf(MainWndProc)
 _RadSys_wcl.hbrBackground=h3DFaceBrush
 RegisterClassEx(_RadSys_wcl)
-CreateWindowEx(&H00000000,"NORMAL0","Si5351a + FT232HL制御ツール",&H10cf0000,-2147483648,-2147483648,461,392,0,0,GetModuleHandle(0),0)
+CreateWindowEx(&H00000000,"NORMAL0","FT232H - Si5351a制御ツール ver 1.0 NativeD2XX",&H10cf0000,-2147483648,-2147483648,461,413,0,0,GetModuleHandle(0),0)

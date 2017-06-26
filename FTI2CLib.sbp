@@ -4,6 +4,7 @@ Private
 	hIIC AS FT_HANDLE
 Public
 	Sub FTDI_MPSSE_I2C()
+		SetLastError(0)
 		Init_libMPSSE()
 	End Sub
 

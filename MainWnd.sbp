@@ -13,6 +13,10 @@
 Function MainWndProc(hWnd As HWND, dwMsg As DWord, wParam As WPARAM, lParam As LPARAM) As DWord
 	' TODO: この位置にウィンドウメッセージを処理するためのコードを記述します。
 
+	'デバイス接続イベント
+	if dwMsg=WM_DEVICECHANGE Then	ListupDevices()
+
+
 	' イベントプロシージャの呼び出しを行います。
 	MainWndProc=EventCall_MainWnd(hWnd,dwMsg,wParam,lParam)
 End Function
@@ -32,7 +36,7 @@ End Sub
 ' ここから下は、イベントプロシージャを記述するための領域になります。
 
 Sub MainWnd_Destroy()
-	Si5351a_DestroyObjects()
+	FT232H_Si5351a_DestroyObjects()
 	PostQuitMessage(0)
 End Sub
 
@@ -64,15 +68,20 @@ Sub ListupDevices()
 
 	SendMessage(MWnd(ComboBox1),CB_RESETCONTENT,0,0)
 
-	if I2C_GetNumChannels(VarPtr(devCount))<>FT_OK Then ExitFunction
+	FT_GetNumDevices(devCount,NULL,FT_LIST_BY_NUMBER_ONLY)
 	if devCount=0 Then SendMessage(MWnd(ComboBox1),CB_ADDSTRING,0,"FTDI Device not found." AS Long):Goto *LD_END
 
 	Dim i AS Long
-	Dim devList AS FT_DEVICE_LIST_INFO_NODE
+	Dim serial[64] As Byte,desc[64] As Byte
 	For i = 0 To devCount-1
-		I2C_GetChannelInfo(i,VarPtr(devList))
+		if FT_ListDevices(i,serial,FT_LIST_BY_INDEX or FT_OPEN_BY_SERIAL_NUMBER)<>FT_OK Then 
+			SendMessage(MWnd(ComboBox1),CB_ADDSTRING,0,sprintfStr("[%02d] open err",i))
+			Continue
+		End If
+		FT_ListDevices(i,desc  ,FT_LIST_BY_INDEX or FT_OPEN_BY_DESCRIPTION)
+
 		SendMessage(MWnd(ComboBox1),CB_ADDSTRING,0, _
-				sprintfStr(ex"[%02d]%s - %s\n",i,devList.SerialNumber As DWord,devList.Description AS DWord))
+				sprintfStr(ex"[%02d]%s - %s\n",i,serial As DWord,desc AS DWord))
 	Next i
 
 *LD_END
@@ -99,44 +108,76 @@ Sub UpdateEditBox()
 	SetWindowText(MWnd(Static17),"="+Str$(1<<GetTrackBarValue(MWnd(TrackBar7))))
 End Sub
 
-Sub UpdateTrackBar()
-	'vco
-	SetTrackBarValue(MWnd(TrackBar1),GetDlgItemInt(hMainWnd,EditBox1,0,FALSE))
-	SetTrackBarValue(MWnd(TrackBar2),GetDlgItemInt(hMainWnd,EditBox3,0,FALSE))
-	SetTrackBarValue(MWnd(TrackBar3),GetDlgItemInt(hMainWnd,EditBox4,0,FALSE))
-	'fout
-	SetTrackBarValue(MWnd(TrackBar4),GetDlgItemInt(hMainWnd,EditBox5,0,FALSE))
-	SetTrackBarValue(MWnd(TrackBar5),GetDlgItemInt(hMainWnd,EditBox7,0,FALSE))
-	SetTrackBarValue(MWnd(TrackBar6),GetDlgItemInt(hMainWnd,EditBox8,0,FALSE))
-	SetTrackBarValue(MWnd(TrackBar7),GetDlgItemInt(hMainWnd,EditBox9,0,FALSE))
+Sub UpdateTrackBar()	
+	Dim conf As Si5351A_CONFIG
+	GetClkgenConf(VarPtr(conf))
+	With conf
+		'vco
+		SetTrackBarValue(MWnd(TrackBar1), .vcoA)
+		SetTrackBarValue(MWnd(TrackBar2), .vcoB)
+		SetTrackBarValue(MWnd(TrackBar3), .vcoC)
+		'fout
+		SetTrackBarValue(MWnd(TrackBar4), .divA)
+		SetTrackBarValue(MWnd(TrackBar5), .divB)
+		SetTrackBarValue(MWnd(TrackBar6), .divC)
+		SetTrackBarValue(MWnd(TrackBar7), .R_DIV)
+	EndWith
 End Sub
 
 Function CalcVCO() AS Double
-	Dim m AS Long,n AS Long,d AS Long,crystal AS Long
-	crystal=GetDlgItemInt(hMainWnd,EditBox2,0,FALSE)
-	m=GetDlgItemInt(hMainWnd,EditBox1,0,FALSE)
-	n=GetDlgItemInt(hMainWnd,EditBox3,0,FALSE)
-	d=GetDlgItemInt(hMainWnd,EditBox4,0,FALSE)
-	CalcVCO=crystal*(m+n/d)
+	Dim conf As Si5351A_CONFIG
+	GetClkgenConf(VarPtr(conf))
+
+	With conf
+		CalcVCO=.crystal * (.vcoA + .vcoB/.vcoC)
+	End With
 End Function
 
 Function CalcFdiv() AS Double
-	Dim m AS Long,n AS Long,d AS Long,rd AS Long
-	m=GetDlgItemInt(hMainWnd,EditBox5,0,FALSE)
-	n=GetDlgItemInt(hMainWnd,EditBox7,0,FALSE)
-	d=GetDlgItemInt(hMainWnd,EditBox8,0,FALSE)
-	rd=1<<GetDlgItemInt(hMainWnd,EditBox9,0,FALSE)
-	CalcFdiv=(m + (n/d)) * rd
+	Dim conf As Si5351A_CONFIG
+	GetClkgenConf(VarPtr(conf))
+
+	With conf
+		CalcFdiv=(.divA + (.divB/.divC)) * (1<<.R_DIV)
+	End With
 End Function
 
 Function CalcFout() AS Double
 	CalcFout=CalcVCO() / CalcFdiv()
 End Function
 
+Sub GetClkgenConf(conf As *Si5351A_CONFIG)
+	conf->crystal= 	GetDlgItemInt(hMainWnd,EditBox2,0,FALSE)
+	conf->vcoA	= 	GetDlgItemInt(hMainWnd,EditBox1,0,FALSE)
+	conf->vcoB	= 	GetDlgItemInt(hMainWnd,EditBox3,0,FALSE)
+	conf->vcoC	= 	GetDlgItemInt(hMainWnd,EditBox4,0,FALSE)
+	conf->divA	= 	GetDlgItemInt(hMainWnd,EditBox5,0,FALSE)
+	conf->divB	= 	GetDlgItemInt(hMainWnd,EditBox7,0,FALSE)
+	conf->divC	= 	GetDlgItemInt(hMainWnd,EditBox8,0,FALSE)
+	conf->div4	= 	0
+	conf->R_DIV	= 	GetDlgItemInt(hMainWnd,EditBox9,0,FALSE) AS Byte
+End Sub
+
+Sub SetClkgenConf(conf As *Si5351A_CONFIG)
+	'vco
+	SetWindowText(MWnd(EditBox1), Str$(conf->vcoA))
+	SetWindowText(MWnd(EditBox3), Str$(conf->vcoB))
+	SetWindowText(MWnd(EditBox4), Str$(conf->vcoC))
+	'fout
+	SetWindowText(MWnd(EditBox5), Str$(conf->divA))
+	SetWindowText(MWnd(EditBox7), Str$(conf->divB))
+	SetWindowText(MWnd(EditBox8), Str$(conf->divC))
+	SetWindowText(MWnd(EditBox9), Str$(conf->R_DIV))
+	SetWindowText(MWnd(Static17),"="+Str$(1<<conf->R_DIV))
+	UpdateTrackBar()
+	UpdateEditBox()
+	DispValues()
+End Sub
+
 Sub DispValues()
 	Dim vco AS Double
 	vco=CalcVCO()
-	SetWindowText(MWnd(Static7),sprintfStr("vco=%d.%d[MHz]",vco AS DWord,((vco-Int(vco) AS Double)*10000) AS DWord))
+	SetWindowText(MWnd(Static7),doubleToFormatStr("vco=%.01f[MHz]",vco))
 
 	Dim Mes aS BytePtr
 	if vco<600 or vco>900 Then
@@ -146,15 +187,23 @@ Sub DispValues()
 	End If
 	SetWindowText(MWnd(Static13),Mes)
 
-	Dim fout AS Double,fdiv as Double
+	Dim fout AS Double,fdiv as Double,sim AS String
 	fout=CalcFout()
-	SetWindowText(MWnd(Static12),sprintfStr("fout=%d.%d[MHz]",fout AS DWord,((fout-Int(fout) AS Double)*10000) AS DWord))
+	if fout > 1 Then
+		sim="[MHz]"
+	Else
+		fout=fout*1000
+		sim="[KHz]"
+	End If
+	
+	SetWindowText(MWnd(Static12),doubleToFormatStr("fout=%5.03f",fout)+sim)
+
 
 	fdiv=CalcFdiv()
 	if fdiv<6 or fdiv>1800 Then
-		Mes="fout NG [6 < (a + (b/c)) < 1800] "
+		Mes="diverter NG [6 < (a + (b/c) * RDiv) < 1800] "
 	Else
-		Mes="fout OK"
+		Mes="diverter OK"
 	End If
 	SetWindowText(MWnd(Static8),Mes)
 
@@ -180,45 +229,47 @@ End Function
 
 Sub DBM(text AS BytePtr)
 	SetWindowText(hMainWnd,text)
+	OutputDebugString(text)
+	OutputDebugString(ex"\r\n")
 End Sub
 
+
 Sub MainWnd_CommandButton1_Click()
-	Dim iic AS *FTDI_MPSSE_I2C
-	Dim lcd AS *I2C_LCD_ST7032
-	Dim clk AS *I2C_Si5351A
+	Dim ft AS *FT232H
+	Dim clk AS *FT232H_Si5351A
+	Dim lcd AS *FT232H_ST7032
 
-	iic=new FTDI_MPSSE_I2C()
-	lcd=new I2C_LCD_ST7032(iic)
-	clk=new I2C_Si5351A(iic)
+	ft=new FT232H()
+	ft->iic->init()
 
-	if iic->openDevice(GetOpenDeviceIndex())<>0 Then 
+	lcd=new FT232H_ST7032(ft)
+	clk=new FT232H_Si5351A(ft)
+
+	if ft->openDevice(GetOpenDeviceIndex())=FALSE Then 
 		MessageBox(hMainWnd,"デバイスを開けませんでした",0,MB_ICONERROR)
 		ExitSub
 	End If
 
-	lcd->init()
-	clk->SetClk0(GetDlgItemInt(hMainWnd,EditBox1,0,FALSE), _
-				 GetDlgItemInt(hMainWnd,EditBox3,0,FALSE), _
-				 GetDlgItemInt(hMainWnd,EditBox4,0,FALSE), _
-				 GetDlgItemInt(hMainWnd,EditBox5,0,FALSE), _
-				 GetDlgItemInt(hMainWnd,EditBox7,0,FALSE), _
-				 GetDlgItemInt(hMainWnd,EditBox8,0,FALSE), _
-				 0, _
-				 GetDlgItemInt(hMainWnd,EditBox9,0,FALSE) AS Byte)
+	Dim conf AS Si5351A_CONFIG
+	GetClkgenConf(VarPtr(conf))
+	clk->SetClk0(conf)
 
-	Dim fout AS Double
+	Dim fout AS Double,sim AS String
 	fout=CalcFout()
-	lcd->print(0,0,"Set freq:")
+
+	lcd->init()
+	lcd->print(0,0,"Freq Gen")
 	if fout > 1 Then
-		lcd->print(0,1,sprintfStr("%3d.%dMHz",fout AS DWord,((fout-Int(fout) AS Double)*10) AS DWord))
+		sim="MHz"
 	Else
 		fout=fout*1000
-		lcd->print(0,1,sprintfStr("%3d.%dKHz",fout AS DWord,((fout-Int(fout) AS Double)*10) AS DWord))
+		sim="KHz"
 	End If
+	lcd->print(0,1,doubleToFormatStr("%5.01f",fout)+sim)
 
-	delete iic
 	delete lcd
 	delete clk
+	delete ft
 End Sub
 
 Sub MainWnd_EditBox7_Change()
@@ -238,4 +289,13 @@ End Function
 
 Sub MainWnd_Static15_Click()
 	ListupDevices()
+End Sub
+
+
+Sub MainWnd_CommandButton2_Click()
+	Dim clk AS FT232H_Si5351A(0)
+	Dim conf AS Si5351A_CONFIG
+
+	clk.CalcParameter(GetDlgItemDouble(MWnd(EditBox6))/1000,conf)
+	SetClkgenConf(VarPtr(conf))
 End Sub

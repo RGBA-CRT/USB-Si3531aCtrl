@@ -1,6 +1,8 @@
 TypeDef FT_HANDLE = Long
 TypeDef FT_STATUS = Long
 
+
+#ifndef _WIN64
 Declare Sub Init_libMPSSE	 CDECL Lib "libMPSSE.dll" ()
 Declare Sub Cleanup_libMPSSE CDECL Lib "libMPSSE.dll" ()
 
@@ -17,6 +19,39 @@ Declare Function SPI_ChangeCS 		CDECL Lib "libMPSSE.dll" (handle AS FT_HANDLE, c
 Declare Function FT_WriteGPIO 		CDECL Lib "libMPSSE.dll" (handle AS FT_HANDLE, dir As Byte,value AS DWord) AS FT_STATUS
 Declare Function FT_ReadGPIO		CDECL Lib "libMPSSE.dll" (handle AS FT_HANDLE, value AS *Byte) AS FT_STATUS
 'Declare Function SPI_ToggleCS 		CDECL Lib "libMPSSE.dll" (handle AS FT_HANDLE, state AS Long) AS FT_STATUS
+Declare Function I2C_GetNumChannels	CDECL Lib "libMPSSE.dll" (numChannels AS *DWord) AS FT_STATUS
+Declare Function I2C_GetChannelInfo	CDECL Lib "libMPSSE.dll" (index AS DWord, chanInfo AS *FT_DEVICE_LIST_INFO_NODE) AS FT_STATUS
+Declare Function I2C_OpenChannel	CDECL Lib "libMPSSE.dll" (index aS DWord, handle AS *FT_HANDLE) AS FT_STATUS
+Declare Function I2C_InitChannel	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE,ByRef config AS ChannelConfig) AS FT_STATUS
+Declare Function I2C_CloseChannel	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE) AS FT_STATUS
+Declare Function I2C_DeviceRead 	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE, deviceAddress AS DWord, sizeToTransfer AS DWord,buffer AS BytePtr,ByRef sizeTransfered AS DWord, options AS DWord) AS FT_STATUS
+Declare Function I2C_DeviceWrite	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE, deviceAddress AS DWord, sizeToTransfer AS DWord,buffer AS BytePtr,ByRef sizeTransfered AS DWord, options AS DWord) AS FT_STATUS
+
+#else
+Declare Sub Init_libMPSSE	 CDECL Lib "libMPSSE64.dll" ()
+Declare Sub Cleanup_libMPSSE CDECL Lib "libMPSSE64.dll" ()
+
+Declare Function SPI_GetNumChannels	CDECL Lib "libMPSSE64.dll" (nChannle AS *DWord) As FT_STATUS
+Declare Function SPI_GetChannelInfo	CDECL Lib "libMPSSE64.dll" (index AS DWord,ByRef chInfo AS FT_DEVICE_LIST_INFO_NODE) As FT_STATUS
+Declare Function SPI_OpenChannel 	CDECL Lib "libMPSSE64.dll" (index AS DWord,ByRef handle AS FT_HANDLE) As FT_STATUS
+Declare Function SPI_InitChannel 	CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE, config as *LibMPSSE_CHANNEL_CONFIG) AS FT_STATUS
+Declare Function SPI_CloseChannel 	CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE ) AS FT_STATUS
+Declare Function SPI_Read 			CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE,buf AS BytePtr,size As DWord,ByRef dwAB as DWord,opt As DWord) AS FT_STATUS
+Declare Function SPI_Write 			CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE,buf AS BytePtr,size As DWord,ByRef dwAB as DWord,opt As DWord) AS FT_STATUS
+Declare Function SPI_ReadWrite		CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE,inBuffer AS BytePtr,outBuffer AS BytePtr,size AS DWord,ByRef dwAB aS DWord,opt AS DWord) AS FT_STATUS
+Declare Function SPI_IsBusy 		CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE,ByRef state AS Long) AS FT_STATUS
+Declare Function SPI_ChangeCS 		CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE, config as *LibMPSSE_CHANNEL_CONFIG) AS FT_STATUS
+Declare Function FT_WriteGPIO 		CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE, dir As Byte,value AS DWord) AS FT_STATUS
+Declare Function FT_ReadGPIO		CDECL Lib "libMPSSE64.dll" (handle AS FT_HANDLE, value AS *Byte) AS FT_STATUS
+
+Declare Function I2C_GetNumChannels	CDECL Lib "libMPSSE64.dll" (numChannels AS *DWord) AS FT_STATUS
+Declare Function I2C_GetChannelInfo	CDECL Lib "libMPSSE64.dll" (index AS DWord, chanInfo AS *FT_DEVICE_LIST_INFO_NODE) AS FT_STATUS
+Declare Function I2C_OpenChannel	CDECL Lib "libMPSSE64.dll" (index aS DWord, handle AS *FT_HANDLE) AS FT_STATUS
+Declare Function I2C_InitChannel	CDECL Lib "libMPSSE64.dll" (handle As FT_HANDLE,ByRef config AS ChannelConfig) AS FT_STATUS
+Declare Function I2C_CloseChannel	CDECL Lib "libMPSSE64.dll" (handle As FT_HANDLE) AS FT_STATUS
+Declare Function I2C_DeviceRead 	CDECL Lib "libMPSSE64.dll" (handle As FT_HANDLE, deviceAddress AS DWord, sizeToTransfer AS DWord,buffer AS BytePtr,ByRef sizeTransfered AS DWord, options AS DWord) AS FT_STATUS
+Declare Function I2C_DeviceWrite	CDECL Lib "libMPSSE64.dll" (handle As FT_HANDLE, deviceAddress AS DWord, sizeToTransfer AS DWord,buffer AS BytePtr,ByRef sizeTransfered AS DWord, options AS DWord) AS FT_STATUS
+#endif
 
 Type FT_DEVICE_LIST_INFO_NODE
 	Flags As DWord
@@ -135,10 +170,3 @@ Type ChannelConfig
 End Type
 
 
-Declare Function I2C_GetNumChannels	CDECL Lib "libMPSSE.dll" (numChannels AS *DWord) AS FT_STATUS
-Declare Function I2C_GetChannelInfo	CDECL Lib "libMPSSE.dll" (index AS DWord, chanInfo AS *FT_DEVICE_LIST_INFO_NODE) AS FT_STATUS
-Declare Function I2C_OpenChannel	CDECL Lib "libMPSSE.dll" (index aS DWord, handle AS *FT_HANDLE) AS FT_STATUS
-Declare Function I2C_InitChannel	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE,ByRef config AS ChannelConfig) AS FT_STATUS
-Declare Function I2C_CloseChannel	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE) AS FT_STATUS
-Declare Function I2C_DeviceRead 	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE, deviceAddress AS DWord, sizeToTransfer AS DWord,buffer AS BytePtr,ByRef sizeTransfered AS DWord, options AS DWord) AS FT_STATUS
-Declare Function I2C_DeviceWrite	CDECL Lib "libMPSSE.dll" (handle As FT_HANDLE, deviceAddress AS DWord, sizeToTransfer AS DWord,buffer AS BytePtr,ByRef sizeTransfered AS DWord, options AS DWord) AS FT_STATUS
