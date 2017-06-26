@@ -272,10 +272,6 @@ Sub MainWnd_CommandButton1_Click()
 	delete ft
 End Sub
 
-Sub MainWnd_EditBox7_Change()
-
-End Sub
-
 Function Bin$(Num As DWord)(Wide As Byte) AS String
 	Dim i AS Long,buf[32] AS Byte
 	if Wide>4 Then Wide=4
