@@ -1,9 +1,9 @@
 WINDOW:MainWnd
     HANDLE    = hMainWnd
     POINT     = -2147483648,-2147483648
-    SIZE      = 461,413
+    SIZE      = 455,395
     CAPTION   = "FT232H - Si5351a制御ツール ver 1.0 NativeD2XX"
-    STYLE     = &H10cf0000
+    STYLE     = &H10ca0000
     EXSTYLE   = &H00000000
     ID        = 0
     BGCOLOR   = 15
@@ -42,7 +42,7 @@ WINDOW:MainWnd
     ITEM      = Static13,24,137,272,12,"Text13",&H50000000,&H00000000,11
     ITEM      = Static14,24,227,61,14,"b[1048575]",&H50000000,&H00000000,11
     ITEM      = Static8,24,297,305,12,"Text8",&H50000000,&H00000000,11
-    ITEM      = CommandButton1,350,346,88,21,"適用",&H50000000,&H00000000,1
+    ITEM      = CommandButton1,351,346,88,21,"適用",&H50000000,&H00000000,1
     ITEM      = ComboBox1,72,346,214,84,"",&H50200002,&H00000000,3
     ITEM      = Static15,21,349,46,12,"FT232H : ",&H50000100,&H00000000,11
     ITEM      = Static16,24,274,57,12,"Rdiv[128]",&H50000000,&H00000000,11

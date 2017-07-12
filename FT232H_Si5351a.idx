@@ -16,3 +16,7 @@
 
 'RADツールが生成するウィンドウ生成プログラム
 #include "MakeWindow.wbp"
+
+'リソースファイル
+#include "resource.sbp"
+#resource "FT232H_Si5351a.rc"

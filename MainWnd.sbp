@@ -250,6 +250,8 @@ Sub MainWnd_CommandButton1_Click()
 		ExitSub
 	End If
 
+	ft->gpio->setExtACBus(&H2)
+
 	Dim conf AS Si5351A_CONFIG
 	GetClkgenConf(VarPtr(conf))
 	clk->SetClk0(conf)
@@ -266,6 +268,8 @@ Sub MainWnd_CommandButton1_Click()
 		sim="KHz"
 	End If
 	lcd->print(0,1,doubleToFormatStr("%5.01f",fout)+sim)
+
+	ft->gpio->setExtACBus(&H1)
 
 	delete lcd
 	delete clk

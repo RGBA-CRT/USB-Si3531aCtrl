@@ -118,7 +118,7 @@ Function EventCall_MainWnd(hWnd As HWND, message As DWord, wParam As WPARAM, lPa
 			SendMessage(GetDlgItem(hWnd,Static14),WM_SETFONT,hFont_MainWnd As WPARAM,0)
 			CreateWindowEx(&H00000000,"STATIC","Text8",&H50000000,24,297,305,12,hWnd,Static8 As HMENU,GetModuleHandle(0),0)
 			SendMessage(GetDlgItem(hWnd,Static8),WM_SETFONT,hFont_MainWnd As WPARAM,0)
-			CreateWindowEx(&H00000000,"BUTTON","適用",&H50000000,350,346,88,21,hWnd,CommandButton1 As HMENU,GetModuleHandle(0),0)
+			CreateWindowEx(&H00000000,"BUTTON","適用",&H50000000,351,346,88,21,hWnd,CommandButton1 As HMENU,GetModuleHandle(0),0)
 			SendMessage(GetDlgItem(hWnd,CommandButton1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
 			CreateWindowEx(&H00000000,"COMBOBOX","",&H50200002,72,346,214,84,hWnd,ComboBox1 As HMENU,GetModuleHandle(0),0)
 			SendMessage(GetDlgItem(hWnd,ComboBox1),WM_SETFONT,hFont_MainWnd As WPARAM,0)
